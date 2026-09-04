@@ -1,18 +1,18 @@
 # DPI-Python
 
-A Python implementation of a Deep Packet Inspection (DPI) engine, ported from an existing C++ DPI implementation.
+A Python-based Deep Packet Inspection (DPI) engine for analyzing network traffic from PCAP files.
 
-The project analyzes network packets from PCAP files, tracks flows, classifies application traffic, extracts domains/SNI information, applies traffic rules, and generates a forwarded output PCAP.
-
----
+The project parses network packets, tracks flows, classifies application traffic, extracts protocol information such as TLS SNI, HTTP Host and DNS queries, applies traffic rules, and generates an output PCAP.
 
 ## 🚀 Features
 
-- Deep Packet Inspection of PCAP traffic
-- IPv4 packet parsing
-- TCP and UDP packet processing
+- PCAP file reading and writing
+- Ethernet and IPv4 packet parsing
+- TCP and UDP packet parsing
+- IPv4/TCP options handling
 - Five-tuple based flow tracking
-- Deterministic flow-to-worker load balancing
+- Deterministic flow load balancing
+- Multithreaded DPI processing
 - TLS SNI extraction
 - HTTP Host extraction
 - DNS query extraction
@@ -21,87 +21,81 @@ The project analyzes network packets from PCAP files, tracks flows, classifies a
 - Source IP blocking
 - Application blocking
 - Domain-based blocking
-- Forward / Drop packet decisions
+- Forward / Drop decisions
 - Output PCAP generation
-- Multithreaded DPI pipeline
-- C++ and Python implementations
-- Automated test suite
-
----
+- Automated unit and integration tests
+- Command-line interface
 
 ## 🏗️ Architecture
 
 ```text
-                 PCAP Input
-                     │
-                     ▼
-              ┌──────────────┐
-              │ PCAP Reader  │
-              └──────┬───────┘
-                     │
-                     ▼
-             ┌───────────────┐
-             │ Packet Parser │
-             └───────┬───────┘
-                     │
-                     ▼
-             ┌────────────────┐
-             │ Load Balancer  │
-             └───────┬────────┘
-                     │
-          ┌──────────┼──────────┐
-          ▼          ▼          ▼
-       FastPath   FastPath   FastPath ...
-          │          │          │
-          └──────────┼──────────┘
-                     │
-                     ▼
-              Flow Tracking
-                     │
-                     ▼
-             Classification
-                     │
-                     ▼
-               Rule Engine
-                     │
-                ┌────┴────┐
-                ▼         ▼
-             Forward    Drop
-                │
-                ▼
-             Output PCAP
-🔍 DPI Processing
-
-The engine processes packets through the following pipeline:
-
+                    Input PCAP
+                        │
+                        ▼
+                 ┌─────────────┐
+                 │ PCAP Reader │
+                 └──────┬──────┘
+                        │
+                        ▼
+                ┌──────────────┐
+                │Packet Parser │
+                └──────┬───────┘
+                       │
+                       ▼
+                ┌──────────────┐
+                │Load Balancer │
+                └──────┬───────┘
+                       │
+              ┌────────┼────────┐
+              ▼        ▼        ▼
+           FastPath FastPath FastPath
+              │        │        │
+              └────────┼────────┘
+                       │
+                       ▼
+                 Flow Tracking
+                       │
+                       ▼
+                Classification
+                       │
+                       ▼
+                  Rule Check
+                       │
+                 ┌─────┴─────┐
+                 ▼           ▼
+              Forward       Drop
+                 │
+                 ▼
+              Output PCAP
+🔍 DPI Processing Pipeline
 PCAP
-  ↓
+ ↓
 Raw Packet
-  ↓
+ ↓
 Ethernet Parsing
-  ↓
+ ↓
 IPv4 Parsing
-  ↓
+ ↓
 TCP / UDP Parsing
-  ↓
+ ↓
 Five-Tuple Flow Identification
-  ↓
+ ↓
 Load Balancing
-  ↓
+ ↓
 Flow Tracking
-  ↓
+ ↓
 Protocol / Application Classification
-  ↓
-Rule Checking
-  ↓
+ ↓
+Rule Evaluation
+ ↓
 Forward or Drop
-  ↓
+ ↓
 Output PCAP
 🧠 Application Classification
 
-The DPI engine uses protocol information and payload inspection for classification.
+The engine classifies traffic using protocol information and payload inspection.
 
-Classification order:
+Classification priority:
 
 TLS SNI inspection for HTTPS traffic
 HTTP Host inspection
@@ -109,25 +103,43 @@ DNS traffic detection
 HTTPS fallback
 HTTP fallback
 
-The classifier can identify applications/domains using configured signatures and extracted information.
+Supported application classifications include examples such as:
 
+AMAZON
+APPLE
+CLOUDFLARE
+DISCORD
+DNS
+FACEBOOK
+GITHUB
+GOOGLE
+HTTP
+HTTPS
+INSTAGRAM
+SPOTIFY
+TELEGRAM
+TIKTOK
+TWITTER
+YOUTUBE
+ZOOM
+UNKNOWN
 🛡️ Traffic Rules
 
-The active DPI implementation supports:
+The DPI engine supports three active rule types.
 
 Source IP Blocking
 
-Packets can be blocked based on their source IPv4 address.
+Blocks packets originating from configured source IPv4 addresses.
 
 Application Blocking
 
-Traffic can be blocked based on the detected application.
+Blocks traffic based on the detected application.
 
 Domain Blocking
 
-Traffic can be blocked when the extracted domain contains a configured substring.
+Blocks traffic when the extracted domain matches a configured domain substring.
 
-Rules are evaluated for every processed packet.
+Rules are evaluated during packet processing.
 
 📁 Project Structure
 DPI-Python/
@@ -159,45 +171,65 @@ DPI-Python/
 │       ├── test_dpi_engine.py
 │       └── test_cli.py
 │
-├── Packet_analyzer/
-│   ├── include/
-│   ├── src/
-│   ├── test_dpi.pcap
-│   └── README.md
-│
+├── test_dpi.pcap
 ├── README.md
 └── .gitignore
-🐍 Python Version
+🐍 Requirements
+Python 3.10+
+No external Python packages are required.
+The project uses the Python standard library.
+▶️ Run the DPI Engine
 
-The Python implementation is located in:
-
-python_dpi/
-
-It is implemented using the Python standard library and does not require external Python packages.
-
-Run the Python DPI Engine
-
-From the project root:
+Open a terminal in the project root:
 
 python -m python_dpi INPUT.pcap OUTPUT.pcap
 
-Example:
+For example:
 
-python -m python_dpi Packet_analyzer/test_dpi.pcap output.pcap
+python -m python_dpi test_dpi.pcap output.pcap
 
-The engine reads the input PCAP, processes the packets, applies DPI logic and rules, and writes the resulting packets to the output PCAP.
+The command reads the input PCAP, processes the packets through the DPI pipeline, and generates the resulting output PCAP.
 
+Example
+Processed packets: 77
+Forwarded: 77
+Dropped: 0
+Total bytes: 5738
+
+Example application classification:
+
+AMAZON: 1
+APPLE: 1
+CLOUDFLARE: 1
+DISCORD: 1
+DNS: 4
+FACEBOOK: 1
+GITHUB: 1
+GOOGLE: 1
+HTTP: 2
+HTTPS: 39
+INSTAGRAM: 1
+SPOTIFY: 1
+TELEGRAM: 1
+TIKTOK: 1
+TWITTER: 3
+UNKNOWN: 16
+YOUTUBE: 1
+ZOOM: 1
 🧪 Testing
 
-The Python implementation includes an automated test suite covering:
+The project contains unit tests and integration tests covering:
 
 Data models
-PCAP reading
-Endianness handling
-Packet parsing
+IPv4 address conversion
+PCAP parsing
+Native and swapped-endian PCAP files
+Ethernet parsing
+IPv4 parsing
 IPv4 options
+TCP parsing
 TCP options
-UDP packets
+UDP parsing
 TLS SNI extraction
 HTTP Host extraction
 DNS extraction
@@ -205,68 +237,23 @@ QUIC detection
 Application classification
 Traffic rules
 Flow tracking
-Load balancing
 FastPath processing
-Complete DPI engine integration
+Load balancing
+Complete DPI engine
 CLI execution
 
-Current test result:
-
-88 tests passed
-
-Run the complete test suite with:
+Run all tests:
 
 python -m unittest discover -s python_dpi/tests -v
-⚙️ C++ Implementation
 
-The original DPI implementation is written in C++ and is located under:
+Current validation:
 
-Packet_analyzer/
-
-The active C++ implementation is:
-
-Packet_analyzer/src/dpi_mt.cpp
-
-It uses the following supporting components:
-
-src/dpi_mt.cpp
-src/pcap_reader.cpp
-src/packet_parser.cpp
-src/sni_extractor.cpp
-src/types.cpp
-
-The Python implementation was developed to reproduce the behavior of the active C++ implementation.
-
-🔨 Building the C++ Version
-
-Using a C++17-compatible compiler:
-
-g++ -std=c++17 -pthread -O2 -I include -o dpi_engine \
-src/dpi_mt.cpp \
-src/pcap_reader.cpp \
-src/packet_parser.cpp \
-src/sni_extractor.cpp \
-src/types.cpp
+88 tests passed
 📊 Validation
 
-The Python implementation was validated against the active C++ implementation using PCAP traffic.
+The Python DPI engine was validated using a test PCAP containing 77 packets.
 
-Validation included:
-
-Normal packets
-Malformed packets
-Non-IPv4 packets
-Non-TCP/UDP IPv4 packets
-HTTP traffic
-TLS/SNI traffic
-DNS traffic
-Source-IP rules
-Application rules
-Domain rules
-PCAP endianness handling
-End-to-end packet processing
-
-Example integration validation:
+Validation result:
 
 Input packets       : 77
 Processed packets   : 77
@@ -275,41 +262,50 @@ Dropped packets     : 0
 Total bytes         : 5738
 TCP packets         : 73
 UDP packets         : 4
-📦 PCAP Support
 
-The engine works with packet capture (.pcap) files.
+The implementation was also tested against malformed packets, non-IPv4 traffic, non-TCP/UDP IPv4 traffic, HTTP traffic, TLS/SNI traffic, DNS traffic, and traffic blocking rules.
+
+📦 PCAP Input / Output
 
 Input:
 
-input.pcap
+test_dpi.pcap
 
 Output:
 
 output.pcap
 
-The output PCAP preserves the packet data and timestamps for forwarded packets.
+The output PCAP contains the packets that were forwarded by the DPI engine.
 
-⚠️ Notes
-The current implementation focuses on IPv4 TCP/UDP traffic.
-Flow tracking follows directional five-tuples.
-Packet output order may differ because of multithreaded processing.
-The implementation is designed to reproduce the behavior of the active C++ DPI implementation rather than introduce unrelated features.
-🛠️ Technologies
-Python
-Python 3
-Standard Library
-unittest
-Multithreading
-PCAP binary parsing
-Raw packet parsing
-C++
-C++17
-GCC
-POSIX-style threading
-PCAP processing
+You can open the generated PCAP in Wireshark for packet-level inspection.
+
+⚙️ Implementation
+
+The project is implemented using Python's standard library.
+
+Major components:
+
+Component	Responsibility
+pcap_reader.py	Reads PCAP files
+packet_parser.py	Parses Ethernet, IPv4, TCP and UDP
+extractors.py	Extracts SNI, HTTP Host, DNS and QUIC information
+classifier.py	Identifies applications
+rules.py	Applies traffic blocking rules
+flow_tracker.py	Tracks packet flows
+fast_path.py	Processes packets and applies DPI logic
+load_balancer.py	Distributes flows between workers
+dpi_engine.py	Coordinates the complete DPI pipeline
+__main__.py	Command-line interface
+⚠️ Limitations
+Current packet inspection focuses on IPv4 traffic.
+TCP and UDP traffic are supported.
+Flow tracking uses directional five-tuples.
+Multithreaded processing means output packet order may differ from input order.
+The project currently processes PCAP files rather than capturing packets directly from a live network interface.
+The DPI signatures are intentionally limited to the applications implemented by the classifier.
 🎯 Purpose
 
-This project demonstrates how a packet inspection pipeline can be implemented from low-level packet parsing through flow tracking, application classification, rule evaluation, and PCAP output.
+This project demonstrates the implementation of a Deep Packet Inspection pipeline in Python, including low-level packet parsing, protocol inspection, flow tracking, application classification, rule evaluation, multithreading, and PCAP generation.
 
-It also demonstrates the process of porting an existing multithreaded C++ networking implementation to Python while preserving its observable behavior.
+The project is designed as a practical networking and backend-oriented systems project.
 ```
