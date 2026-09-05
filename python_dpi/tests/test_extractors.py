@@ -14,7 +14,7 @@ from python_dpi.extractors import (
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-TEST_PCAP = PROJECT_ROOT / "Packet_analyzer" / "test_dpi.pcap"
+TEST_PCAP = PROJECT_ROOT / "test_dpi.pcap"
 
 
 class ExtractorTests(unittest.TestCase):
