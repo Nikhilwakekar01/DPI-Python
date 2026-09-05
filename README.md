@@ -23,15 +23,14 @@ The project implements a complete DPI pipeline including:
 - Windows live traffic interception
 - Unit and integration testing
 
-The **PCAP/offline DPI engine is the primary validated implementation**.
-
-The live DPI implementation is currently an experimental Windows prototype.
+> **The PCAP/offline DPI engine is the primary validated implementation.**
+> The live DPI implementation is currently an experimental Windows prototype.
 
 ---
 
-# 🚀 Features
+## 🚀 Features
 
-## PCAP DPI Engine
+### PCAP DPI Engine
 
 - PCAP file reading and writing
 - Native-endian PCAP support
@@ -60,9 +59,7 @@ The live DPI implementation is currently an experimental Windows prototype.
 - Unit tests
 - Integration tests
 
----
-
-## Experimental Live DPI
+### Experimental Live DPI
 
 The repository also contains an experimental Windows live-traffic implementation using WinDivert.
 
@@ -81,7 +78,7 @@ It can:
 
 ---
 
-# 🏗️ Architecture
+## 🏗️ Architecture
 
 ```text
                          Input PCAP
@@ -122,7 +119,11 @@ It can:
                      │
                      ▼
                   Output PCAP
-🔍 DPI Processing Pipeline
+```
+
+### 🔍 DPI Processing Pipeline
+
+```text
 PCAP
  ↓
 Raw Packet
@@ -146,11 +147,13 @@ Rule Evaluation
 Forward or Drop
  ↓
 Output PCAP
-🧠 Application Classification
+```
+
+### 🧠 Application Classification
 
 The classifier uses packet metadata and payload inspection.
 
-Classification Priority
+**Classification Priority**
 
 The current classification order is:
 
@@ -162,6 +165,7 @@ The current classification order is:
 
 More specifically:
 
+```text
 1. Destination port 443 + sufficient payload
       ↓
    Try TLS SNI extraction
@@ -181,67 +185,61 @@ More specifically:
 5. Destination port 80
       ↓
    HTTP fallback
-Supported Application Types
+```
+
+**Supported Application Types**
 
 The current classifier contains application categories including:
 
-AMAZON
-APPLE
-CLOUDFLARE
-DISCORD
-DNS
-FACEBOOK
-GITHUB
-GOOGLE
-HTTP
-HTTPS
-INSTAGRAM
-SPOTIFY
-TELEGRAM
-TIKTOK
-TWITTER
-YOUTUBE
-ZOOM
-UNKNOWN
+```
+AMAZON       APPLE        CLOUDFLARE   DISCORD
+DNS          FACEBOOK     GITHUB       GOOGLE
+HTTP         HTTPS        INSTAGRAM    SPOTIFY
+TELEGRAM     TIKTOK       TWITTER      YOUTUBE
+ZOOM         UNKNOWN
+```
 
 The exact classification depends on the information visible inside the packet.
 
-Encrypted traffic or traffic without an inspectable hostname may be classified as:
+Encrypted traffic or traffic without an inspectable hostname may be classified as `HTTPS` or `UNKNOWN`.
 
-HTTPS
+---
 
-or:
-
-UNKNOWN
-🛡️ Traffic Rules
+### 🛡️ Traffic Rules
 
 The DPI engine currently supports three active rule types.
 
-1. Source IP Blocking
+**1. Source IP Blocking**
 
 Blocks packets originating from a configured IPv4 address.
 
-Example:
-
+```python
 engine.block_ip("192.168.1.10")
-2. Application Blocking
+```
+
+**2. Application Blocking**
 
 Blocks traffic based on the detected application.
 
-Example:
-
+```python
 engine.block_app("YouTube")
-3. Domain Blocking
+```
+
+**3. Domain Blocking**
 
 Blocks traffic when the extracted domain/SNI contains the configured domain substring.
 
-Example:
-
+```python
 engine.block_domain("youtube")
+```
 
-Domain matching follows the current implementation's substring and case-sensitive behavior.
+> Domain matching follows the current implementation's substring and case-sensitive behavior.
 
-📁 Project Structure
+---
+
+## 📁 Project Structure
+
+```
 DPI-Python/
 │
 ├── python_dpi/
@@ -278,134 +276,148 @@ DPI-Python/
 │
 ├── README.md
 └── .gitignore
-Generated / ignored WinDivert files
+```
 
-Depending on the environment, WinDivert-related files such as:
+> Depending on the environment, WinDivert-related files such as `WinDivert.dll` and `WinDivert.lib` may be present locally but ignored by Git.
 
-WinDivert.dll
-WinDivert.lib
+---
 
-may be present locally but ignored by Git.
+## 🐍 Requirements
 
-🐍 Requirements
-Offline / PCAP Mode
+### Offline / PCAP Mode
 
 The offline DPI engine uses Python's standard library.
 
-Recommended:
+- **Recommended:** Python 3.10+
+- No external Python package is required for the offline PCAP engine.
 
-Python 3.10+
-
-No external Python package is required for the offline PCAP engine.
-
-Live DPI Mode
+### Live DPI Mode
 
 Live DPI requires:
 
-Windows
-64-bit Python
-Python 3.10+
-WinDivert
-PyDivert
-Administrator privileges
+- Windows
+- 64-bit Python
+- Python 3.10+
+- WinDivert
+- PyDivert
+- Administrator privileges
 
 Install PyDivert with:
 
+```bash
 python -m pip install pydivert
+```
 
 Verify installation:
 
+```bash
 python -c "import pydivert; print('PyDivert installed successfully')"
+```
 
 Expected:
 
+```
 PyDivert installed successfully
+```
 
-The live implementation is Windows-specific because it relies on WinDivert.
+> The live implementation is Windows-specific because it relies on WinDivert.
 
-⬇️ Installation
-Step 1 — Clone the Repository
+---
+
+## ⬇️ Installation
+
+### Step 1 — Clone the Repository
 
 Open PowerShell or Command Prompt.
 
-Run:
-
+```bash
 git clone https://github.com/Nikhilwakekar01/DPI-Python.git
-
-This downloads the project from GitHub.
+```
 
 Then enter the project directory:
 
+```bash
 cd DPI-Python
+```
 
-Your terminal should now be inside:
+### Step 2 — Verify Project Files
 
-DPI-Python
-Step 2 — Verify Project Files
-
-Run:
-
+```bash
 dir
+```
 
 You should see files/folders similar to:
 
+```
 python_dpi
 test_dpi.pcap
 live_dpi.py
 windivert
 README.md
 .gitignore
-Step 3 — Check Python
+```
 
-Run:
+### Step 3 — Check Python
 
+```bash
 python --version
+```
 
 Example:
 
+```
 Python 3.14.2
+```
 
 Python 3.10 or newer is recommended.
 
-Step 4 — Optional Virtual Environment
+### Step 4 — Optional Virtual Environment
 
 A virtual environment is recommended if you want an isolated Python environment.
 
 Create it:
 
+```bash
 python -m venv .venv
+```
 
 Activate it on Windows PowerShell:
 
+```powershell
 .\.venv\Scripts\Activate.ps1
-
-If activation succeeds, your terminal may show:
-
-(.venv)
-
-at the beginning of the command line.
+```
 
 For Command Prompt:
 
+```cmd
 .venv\Scripts\activate
-Step 5 — Verify Python Module
+```
+
+If activation succeeds, your terminal may show `(.venv)` at the beginning of the command line.
+
+### Step 5 — Verify Python Module
 
 From the project root, run:
 
+```bash
 python -c "import python_dpi; print('DPI-Python imported successfully')"
+```
 
 Expected:
 
+```
 DPI-Python imported successfully
+```
 
 At this point the offline DPI engine is ready.
 
-🖥️ OFFLINE DPI MODE
+---
+
+## 🖥️ Offline DPI Mode
 
 The offline mode reads packets from a PCAP file, processes them through the DPI pipeline, and writes forwarded packets to another PCAP file.
 
-The basic flow is:
-
+```text
 Input PCAP
     ↓
 PCAP Reader
@@ -421,172 +433,96 @@ Rule Check
 Forward / Drop
     ↓
 Output PCAP
-▶️ Run the Offline DPI Engine
+```
 
-Make sure you are inside:
+### ▶️ Run the Offline DPI Engine
 
-DPI-Python
+Make sure you are inside the `DPI-Python` directory, then run:
 
-Run:
-
+```bash
 python -m python_dpi test_dpi.pcap output.pcap
+```
 
-The command means:
+**Expected Output:**
 
-python
-    ↓
--m python_dpi
-    ↓
-read test_dpi.pcap
-    ↓
-process packets
-    ↓
-write forwarded packets to output.pcap
-Expected Output
-
-A successful run should produce output similar to:
-
+```
 Processed packets: 77
 Forwarded: 77
 Dropped: 0
 Total bytes: 5738
+```
 
-You should now have:
+You should now have `output.pcap` inside the project directory.
 
-output.pcap
+### 🔎 Check That output.pcap Was Created
 
-inside the project directory.
-
-🔎 Check That output.pcap Was Created
-
-Run:
-
+```powershell
 dir output.pcap
+```
 
-You should see the file information.
+Check its size:
 
-You can also check its size:
-
+```powershell
 (Get-Item output.pcap).Length
+```
 
 The size may vary depending on the input/output data.
 
-🧪 RUN ALL TESTS
+---
+
+## 🧪 Run All Tests
 
 The project contains unit tests and integration tests.
 
 From the project root:
 
+```bash
 python -m unittest discover -s python_dpi/tests -v
+```
 
-This runs all tests under:
+**What Is Tested?**
 
-python_dpi/tests/
-What Is Tested?
+| Area | Coverage |
+|------|----------|
+| Data models | IPv4 address conversion, Five-tuple hashing |
+| PCAP parsing | Native-endian, Swapped-endian, Malformed PCAP |
+| Packet parsing | Ethernet, IPv4, IPv4 options, TCP, TCP options, UDP |
+| Extractors | TLS SNI, HTTP Host, DNS, QUIC detection |
+| Engine | Application classification, Traffic rules, Flow tracking, FastPath, Load balancing, Complete DPI, CLI |
+| Integration | Real PCAP integration |
 
-The test suite covers:
+**Expected Test Result:**
 
-Data models
-IPv4 address conversion
-Five-tuple hashing
-PCAP parsing
-Native-endian PCAP
-Swapped-endian PCAP
-Malformed PCAP
-Ethernet parsing
-IPv4 parsing
-IPv4 options
-TCP parsing
-TCP options
-UDP parsing
-TLS SNI extraction
-HTTP Host extraction
-DNS extraction
-QUIC detection
-Application classification
-Traffic rules
-Flow tracking
-FastPath processing
-Load balancing
-Complete DPI engine
-CLI execution
-Real PCAP integration
-Expected Test Result
-
-The validated test suite result is:
-
+```
 Ran 88 tests
 OK
+```
 
-If you see:
+---
 
-OK
+## 🔐 Test Offline Blocking
 
-the complete automated test suite has passed.
-
-🔐 TEST OFFLINE BLOCKING
-
-The DPI engine can also block traffic while processing a PCAP.
-
-The included:
-
-test_dpi.pcap
-
-contains a packet that can be classified as YouTube traffic.
-
-We can test application blocking without changing the source code.
+The DPI engine can block traffic while processing a PCAP. The included `test_dpi.pcap` contains a packet that can be classified as YouTube traffic.
 
 Run:
 
+```bash
 python -c "from python_dpi.dpi_engine import DPIEngine; e=DPIEngine(); e.block_app('YouTube'); ok=e.process('test_dpi.pcap','blocked_output.pcap'); print('Process successful:', ok); print('Processed:', e.stats.total_packets); print('Forwarded:', e.stats.forwarded); print('Dropped:', e.stats.dropped); print('Bytes:', e.stats.total_bytes)"
-What Does This Command Do?
+```
 
-The command:
+**Expected Result:**
 
-from python_dpi.dpi_engine import DPIEngine
-
-imports the DPI engine.
-
-Then:
-
-e = DPIEngine()
-
-creates a DPI engine.
-
-Then:
-
-e.block_app("YouTube")
-
-adds a YouTube blocking rule.
-
-Then:
-
-e.process(
-    "test_dpi.pcap",
-    "blocked_output.pcap"
-)
-
-processes the input PCAP and writes only forwarded packets to:
-
-blocked_output.pcap
-Expected Result
-
-Expected validation result:
-
+```
 Process successful: True
 Processed: 77
 Forwarded: 76
 Dropped: 1
 Bytes: 5738
+```
 
-The important part is:
+**What happened:**
 
-Processed: 77
-Forwarded: 76
-Dropped: 1
-
-This means:
-
+```text
 77 packets entered DPI
         │
         ▼
@@ -596,43 +532,35 @@ This means:
    ▼         ▼
  DROP      FORWARD
   1           76
-🔎 VERIFY BLOCKED OUTPUT PCAP
+```
 
-The generated file is:
+### 🔎 Verify Blocked Output PCAP
 
-blocked_output.pcap
-
-Check that it exists:
-
-dir blocked_output.pcap
-Count Packets in Output
-
-Run:
-
+```bash
 python -c "from python_dpi.pcap_reader import PcapReader; r=PcapReader(); print('Opened:', r.open('blocked_output.pcap')); n=0; p=r.read_next_packet(); exec('while p is not None:\n n += 1\n p = r.read_next_packet()'); print('Output packets:', n); r.close()"
+```
 
-Expected:
+**Expected:**
 
+```
 Opened: True
 Output packets: 76
+```
 
-This confirms that:
+This confirms:
+- **Input:** 77 packets
+- **Output:** 76 packets
+- **Dropped:** 1 packet
 
-Input:
-77 packets
+---
 
-Output:
-76 packets
-
-Therefore:
-
-1 packet was dropped
-📊 OFFLINE VALIDATION
+## 📊 Offline Validation
 
 The Python DPI engine has been validated using the included test PCAP.
 
-Validation result:
+**Validation Result:**
 
+```
 Input packets       : 77
 Processed packets   : 77
 Forwarded packets   : 77
@@ -640,118 +568,85 @@ Dropped packets     : 0
 Total bytes         : 5738
 TCP packets         : 73
 UDP packets         : 4
+```
 
-Application classification includes:
+**Application Classification:**
 
-AMAZON      : 1
-APPLE       : 1
-CLOUDFLARE  : 1
-DISCORD     : 1
-DNS         : 4
-FACEBOOK    : 1
-GITHUB      : 1
-GOOGLE      : 1
-HTTP        : 2
-HTTPS       : 39
-INSTAGRAM   : 1
-SPOTIFY     : 1
-TELEGRAM    : 1
-TIKTOK      : 1
-TWITTER     : 3
-UNKNOWN     : 16
-YOUTUBE     : 1
-ZOOM        : 1
+```
+AMAZON      : 1       APPLE       : 1
+CLOUDFLARE  : 1       DISCORD     : 1
+DNS         : 4       FACEBOOK    : 1
+GITHUB      : 1       GOOGLE      : 1
+HTTP        : 2       HTTPS       : 39
+INSTAGRAM   : 1       SPOTIFY     : 1
+TELEGRAM    : 1       TIKTOK      : 1
+TWITTER     : 3       UNKNOWN     : 16
+YOUTUBE     : 1       ZOOM        : 1
+```
 
-Additional tests cover:
+Additional tests cover: malformed packets, non-IPv4 traffic, non-TCP/UDP IPv4 traffic, HTTP traffic, TLS/SNI traffic, DNS traffic, flow handling, and blocking rules.
 
-Malformed packets
-Non-IPv4 traffic
-Non-TCP/UDP IPv4 traffic
-HTTP traffic
-TLS/SNI traffic
-DNS traffic
-Flow handling
-Blocking rules
-📦 PCAP INPUT / OUTPUT
-Input
-test_dpi.pcap
-Normal Output
-output.pcap
-Blocking Test Output
-blocked_output.pcap
+---
 
-The output PCAP contains packets that were forwarded by the DPI engine.
+## 📦 PCAP Input / Output
 
-Generated PCAP files can be opened using Wireshark.
+| File | Description |
+|------|-------------|
+| `test_dpi.pcap` | Input |
+| `output.pcap` | Normal output |
+| `blocked_output.pcap` | Blocking test output |
 
-🦈 WIRESHARK VERIFICATION
+The output PCAP contains packets that were forwarded by the DPI engine. Generated PCAP files can be opened using Wireshark.
 
-Wireshark can be used to inspect the generated PCAP files.
+---
+
+## 🦈 Wireshark Verification
 
 After running:
 
+```bash
 python -m python_dpi test_dpi.pcap output.pcap
+```
 
-open:
+Open `output.pcap` in Wireshark. You can inspect: Packet number, Source/Destination IP, Protocol, Ports, Packet length, TCP/UDP/TLS/DNS/HTTP information.
 
-output.pcap
+**Verify Blocking With Wireshark**
 
-in Wireshark.
+After running the blocking test, open `blocked_output.pcap` in Wireshark. The blocked packet should not be present in the output.
 
-You can inspect:
+---
 
-Packet number
-Source IP
-Destination IP
-Protocol
-Source port
-Destination port
-Packet length
-TCP information
-UDP information
-TLS information
-DNS information
-HTTP information
-Verify Blocking With Wireshark
+## ⚙️ Implementation
 
-After running:
+| Component | Responsibility |
+|-----------|---------------|
+| `pcap_reader.py` | Reads classic PCAP files |
+| `packet_parser.py` | Parses Ethernet, IPv4, TCP and UDP |
+| `extractors.py` | Extracts TLS SNI, HTTP Host, DNS and basic QUIC information |
+| `classifier.py` | Identifies applications |
+| `rules.py` | Applies traffic blocking rules |
+| `flow_tracker.py` | Tracks directional flows |
+| `fast_path.py` | Processes packets and applies DPI logic |
+| `load_balancer.py` | Distributes flows between FastPath workers |
+| `dpi_engine.py` | Coordinates the complete multithreaded DPI pipeline |
+| `__main__.py` | Provides the command-line interface |
 
-python -c "from python_dpi.dpi_engine import DPIEngine; e=DPIEngine(); e.block_app('YouTube'); ok=e.process('test_dpi.pcap','blocked_output.pcap'); print('Process successful:', ok); print('Processed:', e.stats.total_packets); print('Forwarded:', e.stats.forwarded); print('Dropped:', e.stats.dropped); print('Bytes:', e.stats.total_bytes)"
+---
 
-open:
-
-blocked_output.pcap
-
-in Wireshark.
-
-The blocked packet should not be present in the output.
-
-⚙️ IMPLEMENTATION
-
-The offline DPI engine uses Python's standard library.
-
-Component	Responsibility
-pcap_reader.py	Reads classic PCAP files
-packet_parser.py	Parses Ethernet, IPv4, TCP and UDP
-extractors.py	Extracts TLS SNI, HTTP Host, DNS and basic QUIC information
-classifier.py	Identifies applications
-rules.py	Applies traffic blocking rules
-flow_tracker.py	Tracks directional flows
-fast_path.py	Processes packets and applies DPI logic
-load_balancer.py	Distributes flows between FastPath workers
-dpi_engine.py	Coordinates the complete multithreaded DPI pipeline
-__main__.py	Provides the command-line interface
-🧵 MULTITHREADED PROCESSING
+## 🧵 Multithreaded Processing
 
 The default DPI engine configuration is:
 
+```
 Load Balancers : 2
 FastPaths/LB   : 2
 Total FastPaths: 4
 Queue size     : 10000
+```
 
-The architecture is:
+**Architecture:**
 
+```text
              DPI Engine
                   │
         ┌─────────┴─────────┐
@@ -761,33 +656,19 @@ The architecture is:
      ┌──┴──┐             ┌──┴──┐
      ▼     ▼             ▼     ▼
     FP1   FP2            FP3   FP4
+```
 
-Packets are processed concurrently.
+Packets are processed concurrently. Therefore, output packet order is not guaranteed to match input packet order. Correctness is based on packet contents, timestamps, packet lengths, and forward/drop decisions — not strictly on output order.
 
-Therefore:
+---
 
-Output packet order is not guaranteed to match input packet order.
+## 🌐 Live DPI — Windows / WinDivert
 
-Correctness is based on:
+The repository also contains `live_dpi.py` — the live traffic entry point.
 
-Packet contents
-Timestamps
-Packet lengths
-Forward/drop decisions
-Flow processing
+**Architecture:**
 
-and not strictly on output order.
-
-🌐 LIVE DPI — WINDOWS / WINDIVERT
-
-The repository also contains:
-
-live_dpi.py
-
-This is the live traffic entry point.
-
-The architecture is:
-
+```text
 Windows Network Traffic
           │
           ▼
@@ -810,267 +691,149 @@ Windows Network Traffic
     │               │
     X               ▼
                  WinDivert
-⚠️ IMPORTANT BEFORE LIVE DPI
+```
 
-Live DPI modifies the handling of real network packets.
+> ⚠️ **IMPORTANT BEFORE LIVE DPI:** Live DPI modifies the handling of real network packets.
+>
+> - `FORWARD` → packet continues
+> - `DROP` → packet is discarded
+>
+> Use live mode carefully.
 
-When a packet is intercepted:
+### 🐍 Live DPI Installation
 
-Packet received by WinDivert
-          │
-          ▼
-       DPI checks
-       /       \
-      /         \
-   DROP        FORWARD
-                 │
-                 ▼
-             w.send()
+**Step 1 — Install PyDivert**
 
-If the packet is allowed, it must be reinjected into the network stack.
-
-If the packet is blocked, it is not reinjected.
-
-Therefore:
-
-FORWARD → packet continues
-DROP    → packet is discarded
-
-Use live mode carefully.
-
-🐍 LIVE DPI INSTALLATION
-Step 1 — Install PyDivert
-
-Open PowerShell.
-
-Run:
-
+```bash
 python -m pip install pydivert
+```
 
-Wait until installation completes.
+**Step 2 — Verify PyDivert**
 
-Step 2 — Verify PyDivert
-
-Run:
-
+```bash
 python -c "import pydivert; print('PyDivert installed successfully')"
+```
 
 Expected:
 
+```
 PyDivert installed successfully
-Step 3 — Check Python Architecture
+```
+
+**Step 3 — Check Python Architecture**
 
 Live WinDivert usage should use 64-bit Python.
 
-Run:
-
+```bash
 python -c "import platform; print(platform.architecture()[0])"
+```
 
 Expected:
 
+```
 64bit
-🔑 RUN LIVE DPI AS ADMINISTRATOR
+```
 
-This is important.
+### 🔑 Run Live DPI as Administrator
 
-Close the current terminal.
+Close the current terminal. Open PowerShell → Right Click → **Run as administrator**.
 
-Open:
+Then navigate to the project:
 
-Start Menu
-    ↓
-PowerShell
-    ↓
-Right Click
-    ↓
-Run as administrator
-
-Then navigate to the project.
-
-For example:
-
+```powershell
 cd "C:\Users\<YOUR_USERNAME>\Desktop\DPI-Python"
+```
 
-Check:
+Verify:
 
+```powershell
 dir
+```
 
-You should see:
+You should see: `live_dpi.py`, `python_dpi`, `windivert`.
 
-live_dpi.py
-python_dpi
-windivert
-▶️ START LIVE DPI
+### ▶️ Start Live DPI
 
-Run:
-
+```bash
 python live_dpi.py
+```
 
-The program starts WinDivert and begins intercepting:
+The program starts WinDivert and begins intercepting IPv4 TCP and UDP traffic.
 
-IPv4 TCP traffic
-IPv4 UDP traffic
-🧪 LIVE DPI BASIC TEST
+### 🧪 Live DPI Basic Test
 
-Once:
+Once `python live_dpi.py` is running, open another browser window and generate some network traffic:
 
-python live_dpi.py
-
-is running, open another browser window.
-
-Generate some network traffic by visiting websites.
-
-For example:
-
+```
 https://example.com
 https://github.com
 https://google.com
+```
 
-The DPI engine may print detected TLS SNI information.
+The DPI engine may print detected TLS SNI information. Example:
 
-Example:
-
+```
 Detected SNI:
 example.com -> HTTPS
+```
 
-At the end, or when stopped, a summary can include:
+### 🛑 Stop Live DPI
 
-Packets seen
-Packets processed
-Packets forwarded
-Packets dropped
-Parse errors
-Detected SNI
-🛑 STOP LIVE DPI
-
-To stop the live DPI program:
-
+```
 Ctrl + C
-
-Press:
-
-CTRL
-+
-C
+```
 
 The program should stop its packet interception loop and print its final statistics.
 
-🛡️ LIVE DOMAIN BLOCKING TEST
+---
 
-The current live_dpi.py contains a domain blocking rule.
+### 🛡️ Live Domain Blocking Test
 
-For example:
+The current `live_dpi.py` contains a domain blocking rule:
 
+```python
 rules.block_domain("youtube.com")
+```
 
-This means the live DPI attempts to block packets when the extracted hostname/SNI contains:
+**✏️ Change the Live Blocking Domain**
 
-youtube.com
-✏️ CHANGE THE LIVE BLOCKING DOMAIN
+Open `live_dpi.py`, find `rules.block_domain("youtube.com")`, and change it to another test domain:
 
-Open:
-
-live_dpi.py
-
-Find:
-
-rules.block_domain("youtube.com")
-
-You can change it to another test domain.
-
-For example:
-
+```python
 rules.block_domain("example.com")
+```
 
-Save the file.
+Save the file, then run `python live_dpi.py` as Administrator.
 
-Then run:
+**🧪 Live Blocking Test Procedure**
 
-python live_dpi.py
+1. Open Administrator PowerShell
+2. Go to the project: `cd "C:\Users\<YOUR_USERNAME>\Desktop\DPI-Python"`
+3. Start live DPI: `python live_dpi.py`
+4. Generate traffic to the test domain (e.g., `https://example.com`)
+5. Watch the terminal — if a TLS ClientHello with a visible SNI reaches the DPI engine, it can detect the domain and produce a `DROP` instead of `FORWARD`
 
-as Administrator.
+---
 
-🧪 LIVE BLOCKING TEST PROCEDURE
+### 🔄 Live Packet Flow
 
-Use the following procedure.
+**Allowed packet:**
 
-Step 1
+```text
+Network → WinDivert → DPI Parser → Classification → Rule Check → FORWARD → WinDivert → Network
+```
 
-Open Administrator PowerShell.
+**Blocked packet:**
 
-Step 2
+```text
+Network → WinDivert → DPI Parser → Classification → Rule Check → DROP → Packet not reinjected
+```
 
-Go to the project:
+### 🔎 Live SNI Detection
 
-cd "C:\Users\<YOUR_USERNAME>\Desktop\DPI-Python"
-Step 3
+TLS SNI is useful because the TLS ClientHello may contain the hostname the client is trying to connect to:
 
-Start live DPI:
-
-python live_dpi.py
-Step 4
-
-Generate traffic to the test domain.
-
-For example:
-
-https://example.com
-Step 5
-
-Watch the terminal.
-
-If a TLS ClientHello with a visible SNI reaches the DPI engine, it can detect:
-
-example.com
-
-The rule can then produce:
-
-DROP
-
-instead of:
-
-FORWARD
-🔄 LIVE PACKET FLOW
-
-For an allowed packet:
-
-Network
-   ↓
-WinDivert
-   ↓
-DPI Parser
-   ↓
-Classification
-   ↓
-Rule Check
-   ↓
-FORWARD
-   ↓
-WinDivert
-   ↓
-Network
-
-For a blocked packet:
-
-Network
-   ↓
-WinDivert
-   ↓
-DPI Parser
-   ↓
-Classification
-   ↓
-Rule Check
-   ↓
-DROP
-   ↓
-Packet not reinjected
-🔎 LIVE SNI DETECTION
-
-TLS SNI is useful because the TLS ClientHello may contain the hostname the client is trying to connect to.
-
-For example:
-
+```text
 Client
    ↓
 TLS ClientHello
@@ -1080,532 +843,67 @@ SNI = example.com
 DPI
    ↓
 Domain Rule
+```
 
-The DPI engine can use this hostname for classification/rule evaluation.
+> The hostname is not guaranteed to be visible in every connection.
 
-However, the hostname is not guaranteed to be visible.
+---
 
-⚠️ IMPORTANT LIVE DPI LIMITATIONS
+## ⚠️ Important Limitations
 
-Modern web traffic can make hostname inspection difficult.
+### Live DPI Limitations
 
-Possible reasons include:
+Modern web traffic can make hostname inspection difficult. Possible reasons include:
 
-Encrypted traffic
-QUIC
-HTTP/3
-ECH
-Connection reuse
-Already-established TLS connections
-IPv6 traffic
-Missing ClientHello
-Traffic that does not expose hostname information
+- Encrypted traffic / QUIC / HTTP/3 / ECH
+- Connection reuse
+- Already-established TLS connections
+- IPv6 traffic
+- Missing ClientHello
+- Traffic that does not expose hostname information
 
-Therefore:
+> A domain rule does not guarantee that every packet belonging to that website will be identified and blocked.
 
-A domain rule does not guarantee that every packet belonging to that website will be identified and blocked.
+### 🌐 IPv4 Scope
 
-🌐 IPv4 SCOPE
+The current implementation focuses on **IPv4**. The core parser does not currently provide IPv6 DPI processing. Traffic using IPv6 is outside the current supported DPI scope.
 
-The current implementation focuses on:
+### ⚡ QUIC / HTTP3 Limitation
 
-IPv4
+The project contains basic QUIC packet detection. However, the active FastPath classification path does not provide complete modern QUIC application identification. QUIC traffic may not always be classified with the same accuracy as TCP/TLS traffic.
 
-The core parser does not currently provide IPv6 DPI processing.
+### 🔐 TLS / HTTPS Limitation
 
-Therefore, traffic using:
+The DPI engine **does not decrypt HTTPS traffic**. It attempts to inspect information that is visible without decryption (TLS ClientHello / SNI). If SNI is unavailable, traffic may be classified as `HTTPS` or `UNKNOWN`. The project does not perform TLS man-in-the-middle interception.
 
-IPv6
+### 🔄 Connection Reuse Limitation
 
-is outside the current supported DPI scope.
+If a browser already has an established connection to a server, a new TLS ClientHello may not appear when a new rule is added. The rule may not immediately affect the already-established connection.
 
-For example, if a browser chooses IPv6 for a website, the current IPv4-only live filter may not inspect that traffic.
+> For testing, start DPI first, then start a new browser session, then open the test website.
 
-This is an intentional limitation of the current implementation.
+---
 
-⚡ QUIC / HTTP3 LIMITATION
-
-Modern browsers frequently use:
-
-QUIC
-HTTP/3
-UDP/443
-
-The project contains basic QUIC packet detection.
-
-However:
-
-The active FastPath classification path does not provide complete modern QUIC application identification.
-
-Therefore, QUIC traffic may not always be classified with the same accuracy as TCP/TLS traffic.
-
-🔐 TLS / HTTPS LIMITATION
-
-The DPI engine does not decrypt HTTPS traffic.
-
-It attempts to inspect information that is visible without decryption, such as:
-
-TLS ClientHello
-SNI
-
-If SNI is unavailable, the traffic may simply be classified as:
-
-HTTPS
-
-or:
-
-UNKNOWN
-
-The project does not perform TLS man-in-the-middle interception.
-
-🔄 CONNECTION REUSE LIMITATION
-
-Suppose a browser already has an established connection to a server.
-
-Then you start DPI and add:
-
-rules.block_domain("example.com")
-
-The browser may reuse the existing connection.
-
-In that situation, a new TLS ClientHello may not appear.
-
-Therefore the rule may not immediately affect the already-established connection.
-
-For testing, it is better to:
-
-1. Start DPI
-2. Start a new browser session
-3. Open the test website
-🧹 GENERATED FILES
+## 🧹 Generated Files
 
 Running the offline project may generate:
 
+```
 output.pcap
 blocked_output.pcap
 __pycache__/
 *.pyc
+```
 
-These are development/test artifacts.
+These are development/test artifacts and should normally not be committed to Git. The `.gitignore` file contains rules for common Python cache files, virtual environments, generated PCAP files, IDE files, and build artifacts.
 
-They should normally not be committed to Git.
+---
 
-The .gitignore file contains rules for common:
+## 📋 Quick Start
 
-Python cache files
-Virtual environments
-Generated PCAP files
-IDE files
-Build artifacts
-🧪 COMPLETE OFFLINE TEST — FROM ZERO
+### Offline Mode
 
-A new user can perform the complete offline validation using the following commands.
-
-1. Clone
-git clone https://github.com/Nikhilwakekar01/DPI-Python.git
-2. Enter directory
-cd DPI-Python
-3. Check Python
-python --version
-4. Verify files
-dir
-5. Run all tests
-python -m unittest discover -s python_dpi/tests -v
-
-Expected:
-
-Ran 88 tests
-OK
-6. Run DPI
-python -m python_dpi test_dpi.pcap output.pcap
-
-Expected:
-
-Processed packets: 77
-Forwarded: 77
-Dropped: 0
-Total bytes: 5738
-7. Verify output file
-dir output.pcap
-8. Open output.pcap in Wireshark
-
-Inspect:
-
-IPv4
-TCP
-UDP
-DNS
-TLS
-HTTP
-Application traffic
-🧪 COMPLETE OFFLINE BLOCKING TEST
-
-Run:
-
-python -c "from python_dpi.dpi_engine import DPIEngine; e=DPIEngine(); e.block_app('YouTube'); ok=e.process('test_dpi.pcap','blocked_output.pcap'); print('Process successful:', ok); print('Processed:', e.stats.total_packets); print('Forwarded:', e.stats.forwarded); print('Dropped:', e.stats.dropped); print('Bytes:', e.stats.total_bytes)"
-
-Expected:
-
-Process successful: True
-Processed: 77
-Forwarded: 76
-Dropped: 1
-Bytes: 5738
-
-Then:
-
-dir blocked_output.pcap
-
-And optionally:
-
-python -c "from python_dpi.pcap_reader import PcapReader; r=PcapReader(); print('Opened:', r.open('blocked_output.pcap')); n=0; p=r.read_next_packet(); exec('while p is not None:\n n += 1\n p = r.read_next_packet()'); print('Output packets:', n); r.close()"
-
-Expected:
-
-Opened: True
-Output packets: 76
-🧪 COMPLETE LIVE TEST — FROM ZERO
-1. Install PyDivert
-python -m pip install pydivert
-2. Verify PyDivert
-python -c "import pydivert; print('PyDivert installed successfully')"
-
-Expected:
-
-PyDivert installed successfully
-3. Verify 64-bit Python
-python -c "import platform; print(platform.architecture()[0])"
-
-Expected:
-
-64bit
-4. Open Administrator PowerShell
-
-Run PowerShell as:
-
-Administrator
-5. Enter project
-cd "C:\Users\<YOUR_USERNAME>\Desktop\DPI-Python"
-6. Start live DPI
-python live_dpi.py
-7. Generate traffic
-
-Open a browser and visit websites.
-
-Example:
-
-https://example.com
-https://github.com
-https://google.com
-8. Watch detected traffic
-
-The program may display detected SNI information such as:
-
-example.com -> HTTPS
-9. Test a controlled blocking rule
-
-Edit:
-
-live_dpi.py
-
-and configure:
-
-rules.block_domain("example.com")
-
-Save the file.
-
-Restart:
-
-python live_dpi.py
-
-Then visit:
-
-https://example.com
-
-If the hostname is visible in a TLS ClientHello and the rule matches, the packet can be dropped.
-
-10. Stop
-
-Press:
-
-Ctrl + C
-🛠️ TROUBLESHOOTING
-Problem 1 — python is not recognized
-
-If you see:
-
-'python' is not recognized...
-
-Python may not be installed or may not be in PATH.
-
-Check:
-
-py --version
-
-If that works, you can use:
-
-py -m python_dpi test_dpi.pcap output.pcap
-
-and:
-
-py -m unittest discover -s python_dpi/tests -v
-Problem 2 — PyDivert import error
-
-If:
-
-python -c "import pydivert"
-
-fails, install:
-
-python -m pip install pydivert
-
-Then test again:
-
-python -c "import pydivert; print('PyDivert OK')"
-Problem 3 — Live DPI Permission Error
-
-If WinDivert cannot start or access is denied:
-
-Close the terminal.
-Open PowerShell as Administrator.
-Go to the project directory.
-Run:
-python live_dpi.py
-Problem 4 — No SNI Is Detected
-
-This does not necessarily mean the DPI engine is broken.
-
-Possible reasons:
-
-Traffic is encrypted
-Packet is not a TLS ClientHello
-Browser is using QUIC
-Browser is using HTTP/3
-IPv6 is being used
-Connection was already established
-SNI is not visible
-
-The current project cannot guarantee hostname detection for every modern connection.
-
-Problem 5 — Website Is Not Blocked
-
-A domain rule may fail to block a website because:
-
-The traffic used IPv6
-The traffic used QUIC/HTTP3
-The TLS ClientHello was not visible
-The connection was already established
-The hostname was not exposed
-The packet was classified only as HTTPS/UNKNOWN
-
-The current implementation should therefore be treated as an experimental DPI prototype rather than a complete production firewall.
-
-Problem 6 — Browser Stops Working During Live Testing
-
-Stop the DPI process:
-
-Ctrl + C
-
-Then wait a few seconds and retry the connection.
-
-Live packet interception can affect active network connections.
-
-Problem 7 — Output Packet Order Looks Different
-
-This is expected.
-
-The DPI engine uses multiple worker threads.
-
-Therefore:
-
-Input order
-
-does not necessarily equal:
-
-Output order
-
-Correctness should be checked using:
-
-Packet contents
-Packet lengths
-Timestamps
-Forward/drop decisions
-Flow information
-
-rather than packet ordering alone.
-
-📌 DESIGN DETAILS
-Directional Five-Tuple
-
-Flow identification uses:
-
-Source IP
-Destination IP
-Source Port
-Destination Port
-Protocol
-
-Example:
-
-192.168.1.5:50000
-        ↓
-142.250.x.x:443
-
-and the reverse direction:
-
-142.250.x.x:443
-        ↓
-192.168.1.5:50000
-
-are currently treated as separate directional flows.
-
-Bidirectional flow merging is not currently implemented.
-
-⚖️ DETERMINISTIC LOAD BALANCING
-
-Flows are distributed using deterministic five-tuple hashing.
-
-The purpose is to consistently assign packets belonging to the same directional flow to the same processing path.
-
-Conceptually:
-
-Five-Tuple
-    ↓
-Hash
-    ↓
-Load Balancer
-    ↓
-FastPath Worker
-
-This allows flow-specific state to remain associated with the selected processing worker.
-
-🔢 IPV4 REPRESENTATION
-
-The implementation follows the reference behavior for IPv4 integer representation.
-
-The byte representation is effectively:
-
-octet0
-|
-octet1 << 8
-|
-octet2 << 16
-|
-octet3 << 24
-
-This behavior is relevant to compatibility with the reference implementation and deterministic hashing.
-
-📈 PERFORMANCE / CONCURRENCY
-
-The current default configuration is:
-
-Load Balancers : 2
-FastPaths/LB   : 2
-Total FastPaths: 4
-Queue Size     : 10000
-
-The system is designed around a multithreaded packet-processing pipeline.
-
-It is intended for:
-
-Learning
-Research
-Networking experiments
-DPI prototyping
-Systems programming practice
-Backend/networking projects
-
-It should not currently be considered a production-grade firewall or high-performance commercial DPI engine.
-
-⚠️ LIMITATIONS
-Protocol Limitations
-Packet inspection currently focuses on IPv4.
-IPv6 is not currently supported by the core parser.
-TCP and UDP are supported.
-TLS inspection relies on visible ClientHello/SNI information.
-QUIC detection is basic/heuristic.
-Full QUIC application identification is not implemented.
-Encrypted traffic whose hostname is not visible cannot always be classified by domain.
-Flow Limitations
-Flow tracking uses directional five-tuples.
-Reverse-direction packets are treated as separate flows.
-Bidirectional flow merging is not currently implemented.
-There is no advanced flow expiration/cleanup mechanism in the active implementation.
-Rule Limitations
-
-Current rules support:
-
-Source IPv4 address
-Application
-Domain substring
-
-The current implementation does not provide:
-
-Port-based blocking
-CIDR/range rules
-Advanced protocol rules
-Persistent rule configuration
-Rule files
-Database-backed rules
-Full firewall functionality
-Live DPI Limitations
-Live DPI currently targets Windows.
-WinDivert is required.
-Administrator privileges may be required.
-IPv6 is outside the current implementation scope.
-Not every website can be reliably blocked by hostname.
-Modern HTTPS/QUIC/ECH behavior can limit hostname visibility.
-Connection reuse can prevent a newly added rule from affecting an existing connection.
-Live mode should currently be treated as an experimental implementation rather than a production firewall.
-🔒 SAFETY NOTE
-
-Live DPI interacts with real network traffic.
-
-Use it only on systems and networks where you are authorized to inspect and filter traffic.
-
-For development/testing, prefer:
-
-Your own Windows machine
-Your own test network
-Controlled test domains
-PCAP files
-
-Do not use packet interception to inspect traffic you are not authorized to monitor.
-
-🎯 PURPOSE
-
-This project demonstrates the implementation of a practical:
-
-Deep Packet Inspection Pipeline
-
-in Python.
-
-The project focuses on:
-
-Low-level network packet parsing
-Protocol inspection
-TLS SNI extraction
-HTTP Host extraction
-DNS inspection
-Basic QUIC detection
-Flow tracking
-Deterministic load balancing
-Multithreaded packet processing
-Application classification
-Traffic rule evaluation
-Packet forwarding
-Packet dropping
-PCAP generation
-Automated testing
-Windows live traffic interception
-
-The project demonstrates how a DPI pipeline can be implemented using Python without depending on a large networking framework.
-
-📋 QUICK START
-
-For someone downloading this repository for the first time:
-
-Offline Mode
+```bash
 # 1. Clone
 git clone https://github.com/Nikhilwakekar01/DPI-Python.git
 
@@ -1620,91 +918,307 @@ python -m unittest discover -s python_dpi/tests -v
 
 # 5. Process sample PCAP
 python -m python_dpi test_dpi.pcap output.pcap
+```
 
-Expected:
+**Expected:**
 
+```
 Ran 88 tests
 OK
+```
 
-and:
-
+```
 Processed packets: 77
 Forwarded: 77
 Dropped: 0
 Total bytes: 5738
+```
 
-Then open:
+Then open `output.pcap` in Wireshark.
 
-output.pcap
+### Offline Blocking
 
-in Wireshark.
-
-📋 QUICK START — OFFLINE BLOCKING
+```bash
 python -c "from python_dpi.dpi_engine import DPIEngine; e=DPIEngine(); e.block_app('YouTube'); ok=e.process('test_dpi.pcap','blocked_output.pcap'); print('Process successful:', ok); print('Processed:', e.stats.total_packets); print('Forwarded:', e.stats.forwarded); print('Dropped:', e.stats.dropped); print('Bytes:', e.stats.total_bytes)"
+```
 
-Expected:
+**Expected:**
 
+```
 Process successful: True
 Processed: 77
 Forwarded: 76
 Dropped: 1
 Bytes: 5738
-📋 QUICK START — LIVE MODE
+```
 
-Windows only.
+### Live Mode (Windows Only)
 
-Install:
-
+```bash
+# Install
 python -m pip install pydivert
 
-Verify:
+# Verify
+python -c "import pydivert; print('PyDivert installed successfully')"
+```
 
+Open PowerShell as Administrator, go to the project, then:
+
+```bash
+python live_dpi.py
+```
+
+Generate browser traffic, watch for detected SNI, stop with `Ctrl + C`.
+
+---
+
+## 🧪 Complete Test Procedures
+
+### Complete Offline Test — From Zero
+
+```bash
+# 1. Clone
+git clone https://github.com/Nikhilwakekar01/DPI-Python.git
+
+# 2. Enter directory
+cd DPI-Python
+
+# 3. Check Python
+python --version
+
+# 4. Verify files
+dir
+
+# 5. Run all tests
+python -m unittest discover -s python_dpi/tests -v
+# Expected: Ran 88 tests / OK
+
+# 6. Run DPI
+python -m python_dpi test_dpi.pcap output.pcap
+# Expected: Processed: 77 / Forwarded: 77 / Dropped: 0 / Total bytes: 5738
+
+# 7. Verify output file
+dir output.pcap
+
+# 8. Open output.pcap in Wireshark
+```
+
+### Complete Offline Blocking Test
+
+```bash
+python -c "from python_dpi.dpi_engine import DPIEngine; e=DPIEngine(); e.block_app('YouTube'); ok=e.process('test_dpi.pcap','blocked_output.pcap'); print('Process successful:', ok); print('Processed:', e.stats.total_packets); print('Forwarded:', e.stats.forwarded); print('Dropped:', e.stats.dropped); print('Bytes:', e.stats.total_bytes)"
+```
+
+Expected:
+
+```
+Process successful: True
+Processed: 77
+Forwarded: 76
+Dropped: 1
+Bytes: 5738
+```
+
+Then:
+
+```bash
+dir blocked_output.pcap
+
+python -c "from python_dpi.pcap_reader import PcapReader; r=PcapReader(); print('Opened:', r.open('blocked_output.pcap')); n=0; p=r.read_next_packet(); exec('while p is not None:\n n += 1\n p = r.read_next_packet()'); print('Output packets:', n); r.close()"
+```
+
+Expected:
+
+```
+Opened: True
+Output packets: 76
+```
+
+### Complete Live Test — From Zero
+
+```bash
+# 1. Install PyDivert
+python -m pip install pydivert
+
+# 2. Verify PyDivert
 python -c "import pydivert; print('PyDivert installed successfully')"
 
-Open PowerShell as Administrator.
+# 3. Verify 64-bit Python
+python -c "import platform; print(platform.architecture()[0])"
+```
 
-Go to the project:
+4. Open Administrator PowerShell
+5. Enter project: `cd "C:\Users\<YOUR_USERNAME>\Desktop\DPI-Python"`
+6. Start live DPI: `python live_dpi.py`
+7. Generate traffic by visiting `https://example.com`, `https://github.com`, `https://google.com`
+8. Watch for detected SNI output (e.g., `example.com -> HTTPS`)
+9. Test controlled blocking: edit `live_dpi.py`, set `rules.block_domain("example.com")`, restart, then visit `https://example.com`
+10. Stop with `Ctrl + C`
 
-cd "C:\Users\<YOUR_USERNAME>\Desktop\DPI-Python"
+---
 
-Run:
+## 🛠️ Troubleshooting
 
-python live_dpi.py
+| Problem | Solution |
+|---------|----------|
+| `python is not recognized` | Try `py --version`. If it works, use `py` instead of `python` in all commands. |
+| PyDivert import error | Run `python -m pip install pydivert`, then verify with `python -c "import pydivert; print('PyDivert OK')"` |
+| Live DPI permission error | Close terminal, open PowerShell as Administrator, navigate to project, run `python live_dpi.py` |
+| No SNI detected | Traffic may be encrypted, using QUIC/HTTP3, IPv6, or connection was already established. This does not mean the engine is broken. |
+| Website not blocked | Traffic may have used IPv6, QUIC/HTTP3, or the TLS ClientHello was not visible. Treat as experimental prototype. |
+| Browser stops working during live test | Press `Ctrl + C` to stop DPI, wait a few seconds, then retry the connection. |
+| Output packet order looks different | This is expected. The multithreaded engine does not guarantee input-to-output order. Check correctness via packet contents, lengths, timestamps, and forward/drop decisions. |
 
-Generate browser traffic.
+---
 
-Watch for detected SNI.
+## 📌 Design Details
 
-Stop with:
+### Directional Five-Tuple
 
-Ctrl + C
-🧾 VALIDATION SUMMARY
+Flow identification uses:
+
+```
+Source IP + Destination IP + Source Port + Destination Port + Protocol
+```
+
+Example:
+```
+192.168.1.5:50000  →  142.250.x.x:443   (forward flow)
+142.250.x.x:443    →  192.168.1.5:50000 (treated as separate directional flow)
+```
+
+Bidirectional flow merging is not currently implemented.
+
+### ⚖️ Deterministic Load Balancing
+
+Flows are distributed using deterministic five-tuple hashing to consistently assign packets from the same directional flow to the same processing path:
+
+```text
+Five-Tuple → Hash → Load Balancer → FastPath Worker
+```
+
+### 🔢 IPv4 Representation
+
+The implementation follows the reference behavior for IPv4 integer representation:
+
+```
+octet0 | octet1 << 8 | octet2 << 16 | octet3 << 24
+```
+
+This behavior is relevant to compatibility with the reference implementation and deterministic hashing.
+
+---
+
+## 📈 Performance / Concurrency
+
+The current default configuration:
+
+```
+Load Balancers : 2
+FastPaths/LB   : 2
+Total FastPaths: 4
+Queue Size     : 10000
+```
+
+The system is designed around a multithreaded packet-processing pipeline. It is intended for:
+
+- Learning
+- Research
+- Networking experiments
+- DPI prototyping
+- Systems programming practice
+- Backend/networking projects
+
+> It should not currently be considered a production-grade firewall or high-performance commercial DPI engine.
+
+---
+
+## ⚠️ Limitations Summary
+
+### Protocol Limitations
+
+- Packet inspection currently focuses on IPv4; IPv6 is not currently supported
+- TCP and UDP are supported
+- TLS inspection relies on visible ClientHello/SNI information
+- QUIC detection is basic/heuristic; full QUIC application identification is not implemented
+- Encrypted traffic whose hostname is not visible cannot always be classified by domain
+
+### Flow Limitations
+
+- Flow tracking uses directional five-tuples
+- Reverse-direction packets are treated as separate flows
+- Bidirectional flow merging is not currently implemented
+- No advanced flow expiration/cleanup mechanism in the active implementation
+
+### Rule Limitations
+
+Current rules support: Source IPv4 address, Application, Domain substring.
+
+The current implementation does not provide: Port-based blocking, CIDR/range rules, Advanced protocol rules, Persistent rule configuration, Rule files, Database-backed rules, or full firewall functionality.
+
+### Live DPI Limitations
+
+- Currently targets Windows; WinDivert is required; Administrator privileges may be required
+- IPv6 is outside the current implementation scope
+- Not every website can be reliably blocked by hostname
+- Modern HTTPS/QUIC/ECH behavior can limit hostname visibility
+- Connection reuse can prevent a newly added rule from affecting an existing connection
+- Live mode should be treated as an experimental implementation rather than a production firewall
+
+---
+
+## 🔒 Safety Note
+
+Live DPI interacts with real network traffic.
+
+Use it only on systems and networks where you are **authorized to inspect and filter traffic**.
+
+For development/testing, prefer:
+
+- Your own Windows machine
+- Your own test network
+- Controlled test domains
+- PCAP files
+
+Do not use packet interception to inspect traffic you are not authorized to monitor.
+
+---
+
+## 🎯 Purpose
+
+This project demonstrates the implementation of a practical **Deep Packet Inspection Pipeline** in Python, focusing on:
+
+- Low-level network packet parsing
+- Protocol inspection (TLS SNI, HTTP Host, DNS)
+- Basic QUIC detection
+- Flow tracking
+- Deterministic load balancing
+- Multithreaded packet processing
+- Application classification
+- Traffic rule evaluation
+- Packet forwarding/dropping
+- PCAP generation
+- Automated testing
+- Windows live traffic interception
+
+The project demonstrates how a DPI pipeline can be implemented using Python without depending on a large networking framework.
+
+---
+
+## 🧾 Validation Summary
 
 The current implementation has been validated with:
 
-88 automated tests
+- **88 automated tests**
+- A real PCAP containing **77 packets / 5738 bytes / 73 TCP / 4 UDP**
 
-and a real PCAP containing:
-
-77 packets
-5738 bytes
-73 TCP packets
-4 UDP packets
-
+```
 Normal processing:
-
 Processed : 77
 Forwarded : 77
 Dropped   : 0
+```
 
 Application classification and blocking behavior have also been tested.
 
-The live Windows implementation has been tested separately with real WinDivert traffic, but remains experimental and has limitations around:
-
-IPv6
-QUIC
-HTTP/3
-ECH
-TLS visibility
-Connection reuse
-Modern browser traffic
+> The live Windows implementation has been tested separately with real WinDivert traffic, but remains experimental and has limitations around IPv6, QUIC, HTTP/3, ECH, TLS visibility, connection reuse, and modern browser traffic.
